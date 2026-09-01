@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dialcoach"
+version = "0.1.0"
+description = "Local phone-outreach call tracker: transcription, Claude-based coaching, and Campaign_Tracker.xlsx sync."
+requires-python = ">=3.11"
+readme = "README.md"
+
+[project.scripts]
+callcoach = "dialcoach.cli.main:cli"
+
+[tool.setuptools.packages.find]
+include = ["dialcoach*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra --strict-markers"
+
+[tool.coverage.run]
+source = ["dialcoach"]
+omit = ["dialcoach/dashboard.py"]
