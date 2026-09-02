@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import json
 import logging
+import anthropic
 from dataclasses import dataclass
 
 from dialcoach.agent.prompts import LIVE_SYSTEM_PROMPT, SUMMARY_SYSTEM_PROMPT
@@ -111,9 +112,11 @@ class ClaudeAgent:
             messages=[{"role": "user", "content": transcript_so_far}],
         )
         raw = _extract_text(response)
-
+        print("[RAW]", raw)
         try:
             data = _parse_json_object(raw)
+            print("[DATA]", data)
+
             temperature = data.get("temperature", "unclear")
             if temperature not in VALID_TEMPERATURES:
                 temperature = "unclear"

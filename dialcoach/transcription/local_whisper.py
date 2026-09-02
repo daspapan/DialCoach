@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from callcoach.transcription.base import TranscribedSegment
+from dialcoach.transcription.base import TranscribedSegment
 
 
 class LocalWhisperTranscriber:

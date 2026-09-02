@@ -88,5 +88,5 @@ class LineFileTranscriber:
 
     def __len__(self) -> int:
         """Number of parsed utterances - lets a caller drive one chunk call
-        per line (see callcoach.cli.main.import_call)."""
+        per line (see dialcoach.cli.main.import_call)."""
         return len(self._lines)

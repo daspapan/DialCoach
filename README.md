@@ -20,3 +20,22 @@ See README.md for setup and docs/ARCHITECTURE.md for how the pieces fit
 together. Every module that touches the outside world (audio hardware,
 the Anthropic API, the filesystem) is written behind a small interface so
 it can be exercised in tests without that dependency being present.
+
+
+```python
+python -m streamlit run dialcoach/dashboard.py
+```
+
+```python
+dialcoach sync-tracker
+```
+
+```python
+python scripts/run_live_call.py "Ashirvad Bakery"
+```
+
+
+```python
+from dialcoach.audio.mic_source import MicrophoneSource
+print(MicrophoneSource.list_devices())
+```

@@ -27,7 +27,7 @@ def transcript_to_text(segments: list[TranscriptSegment]) -> str:
     """Render segments as "speaker: text" lines, in chronological order.
 
     This is the exact format the agent prompts expect (see
-    callcoach/agent/prompts.py) - keeping the formatting in one place
+    dialcoach/agent/prompts.py) - keeping the formatting in one place
     means the live and post-call paths can't drift apart.
     """
     ordered = sorted(segments, key=lambda s: s.t_start)

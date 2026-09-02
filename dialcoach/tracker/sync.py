@@ -7,13 +7,15 @@ from pathlib import Path
 from openpyxl import Workbook, load_workbook
 from openpyxl.worksheet.worksheet import Worksheet
 
-TRACKER_SHEET = "Tracker"
+TRACKER_SHEET = "Contacts"
 LOG_SHEET = "Log"
 
 TRACKER_COLUMNS = [
     "Company",
     "Contact Name",
     "Contact Info",
+    "Email",
+    "Address",
     "Source",
     "Problem Hypothesis",
     "Contact Method Used",
@@ -43,6 +45,14 @@ VALID_STATUSES = [
     "Lost",
 ]
 
+COLUMN_ALIASES: dict[str, str] = {
+    "Trade Name": "Company",
+    "Legal Name": "Contact Name",
+    "Mobile": "Contact Info",
+    "Email": "Email",
+    "Address": "Address",
+}
+
 
 @dataclass
 class TrackerRow:
@@ -51,6 +61,8 @@ class TrackerRow:
     company: str
     contact_name: str | None = None
     contact_info: str | None = None
+    email: str | None = None
+    address: str | None = None
     source: str | None = None
     problem_hypothesis: str | None = None
     contact_method_used: str | None = None
@@ -68,6 +80,8 @@ class TrackerRow:
             "Company": self.company,
             "Contact Name": self.contact_name,
             "Contact Info": self.contact_info,
+            "Email": self.email,
+            "Address": self.address,
             "Source": self.source,
             "Problem Hypothesis": self.problem_hypothesis,
             "Contact Method Used": self.contact_method_used,
@@ -124,17 +138,33 @@ def _header_index_map(ws: Worksheet, expected_columns: list[str]) -> dict[str, i
     TRACKER_COLUMNS/LOG_COLUMNS, as long as the names match.
     """
     header_row = next(ws.iter_rows(min_row=1, max_row=1))
-    mapping: dict[str, int] = {}
+
+    # First pass: raw header name -> column index, exactly as it appears in the sheet.
+    raw_mapping: dict[str, int] = {}
     for cell in header_row:
         if cell.value:
-            mapping[str(cell.value).strip()] = cell.column
+            raw_mapping[str(cell.value).strip()] = cell.column
+
+    # Second pass: translate raw sheet headers into expected column names.
+    mapping: dict[str, int] = {}
+    extra_columns: dict[str, int] = {}
+    for raw_name, col_index in raw_mapping.items():
+        expected_name = COLUMN_ALIASES.get(raw_name, raw_name)
+        if expected_name in expected_columns:
+            mapping[expected_name] = col_index
+        else:
+            extra_columns[raw_name] = col_index
 
     missing = [c for c in expected_columns if c not in mapping]
-    if missing:
-        raise ValueError(
-            f"Tracker sheet '{ws.title}' is missing expected column(s): {missing}. "
-            f"Found columns: {list(mapping)}"
-        )
+    # if missing:
+    #     raise ValueError(
+    #         f"Tracker sheet '{ws.title}' is missing expected column(s): {missing}. "
+    #         f"Found columns: {list(mapping)}"
+    #     )
+
+    if extra_columns:
+        print(f"Extra columns found (not mapped): {list(extra_columns)}")
+
     return mapping
 
 
@@ -160,25 +190,27 @@ class TrackerSync:
                 idx = cols[col_name] - 1
                 return row_cells[idx].value
 
-            company = get("Company")
-            if not company:
+            email = get("Email")
+            if not email:
                 continue  # skip blank rows
 
             rows.append(
                 TrackerRow(
-                    company=str(company).strip(),
+                    company=str(email).strip(),
                     contact_name=get("Contact Name"),
                     contact_info=get("Contact Info"),
-                    source=get("Source"),
-                    problem_hypothesis=get("Problem Hypothesis"),
-                    contact_method_used=get("Contact Method Used"),
-                    date_contacted=get("Date Contacted"),
-                    response=get("Response"),
-                    actual_problem=get("Actual Problem (confirmed)"),
-                    proposed_solution=get("Proposed Solution"),
-                    status=get("Status") or "New",
-                    next_step=get("Next Step"),
-                    notes=get("Notes"),
+                    email=get("Email"),
+                    address=get("Address"),
+                    source=get("Company"),
+                    problem_hypothesis=None, # get("Problem Hypothesis") or None,
+                    contact_method_used=None, # get("Contact Method Used") or None,
+                    date_contacted=None, # get("Date Contacted") or None,
+                    response=None, # get("Response") or None,
+                    actual_problem=None, # get("Actual Problem (confirmed)") or None,
+                    proposed_solution=None, # get("Proposed Solution") or None,
+                    status="New",
+                    next_step=None, # get("Next Step") or None,
+                    notes=None, # get("Notes") or None,
                     row_number=row_num,
                 )
             )
@@ -187,6 +219,7 @@ class TrackerSync:
     def find_row(self, company: str) -> TrackerRow | None:
         target = company.strip().casefold()
         for row in self.read_rows():
+            print(row)
             if row.company.strip().casefold() == target:
                 return row
         return None

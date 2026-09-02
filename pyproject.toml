@@ -10,7 +10,7 @@ requires-python = ">=3.11"
 readme = "README.md"
 
 [project.scripts]
-callcoach = "dialcoach.cli.main:cli"
+dialcoach = "dialcoach.cli.main:cli"
 
 [tool.setuptools.packages.find]
 include = ["dialcoach*"]

@@ -22,7 +22,7 @@ def _open_db() -> Database:
 
 @click.group()
 def cli() -> None:
-    """callcoach: a local phone-outreach call tracker."""
+    """dialcoach: a local phone-outreach call tracker."""
 
 
 @cli.command()
@@ -75,7 +75,7 @@ def list_businesses() -> None:
     with _open_db() as db:
         businesses = db.list_businesses()
     if not businesses:
-        click.echo("No businesses yet - run `callcoach sync-tracker` first.")
+        click.echo("No businesses yet - run `dialcoach sync-tracker` first.")
         return
     for b in businesses:
         click.echo(f"[{b.id}] {b.name} - {b.status} ({b.contact_name or 'no contact name'})")
@@ -98,13 +98,13 @@ def import_call(business: str, transcript_path: Path, no_agent: bool) -> None:
     microphone, just a transcript in -> a scored, summarized, logged
     call out. See docs/AUDIO_SETUP.md for turning on live capture later.
     """
-    from callcoach.transcription.mock import LineFileTranscriber
+    from dialcoach.transcription.mock import LineFileTranscriber
 
     settings = get_settings()
     with _open_db() as db:
         biz = db.get_business_by_name(business)
         if biz is None:
-            click.echo(f"No business named {business!r} found. Run `callcoach sync-tracker` first.", err=True)
+            click.echo(f"No business named {business!r} found. Run `dialcoach sync-tracker` first.", err=True)
             sys.exit(1)
 
         agent = None

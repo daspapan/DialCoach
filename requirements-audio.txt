@@ -1,0 +1,12 @@
+# Optional extras for LIVE audio capture and local (offline) transcription.
+# Not needed to run the dashboard, the tracker sync, or the test suite.
+# Install only on the Mac you'll actually be taking calls on:
+#
+#   pip install -r requirements.txt -r requirements-audio.txt
+#
+# whisper.cpp itself is not a pip package - see docs/AUDIO_SETUP.md for
+# building/installing it separately (it's a compiled binary + model file).
+
+sounddevice>=0.4,<0.5
+soundfile>=0.12,<0.13
+numpy>=1.26,<3.0

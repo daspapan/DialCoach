@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 from typing import Iterator
+import numpy as np
 
 
 class MicrophoneSource:
@@ -9,7 +10,7 @@ class MicrophoneSource:
         self,
         out_dir: str | Path,
         chunk_seconds: float = 12.0,
-        sample_rate: int = 16000,
+        sample_rate: int = 44100, # 16000
         device: int | str | None = None,
     ):
         try:
@@ -34,9 +35,14 @@ class MicrophoneSource:
         import sounddevice as sd
         import soundfile as sf
 
+        # print(self.list_devices())
+        # print(sf.info(self.out_dir))
+
         index = 0
         offset = 0.0
         frames_per_chunk = int(self.chunk_seconds * self.sample_rate)
+
+        print("---- IT's CHUNKS-ing ::: Ready ----")
 
         while not self._stopped:
             recording = sd.rec(
@@ -47,6 +53,8 @@ class MicrophoneSource:
                 device=self.device,
             )
             sd.wait()
+
+            print(f"min={recording.min()}, max={recording.max()}, mean_abs={np.abs(recording).mean():.2f}")
 
             chunk_path = self.out_dir / f"chunk_{index:04d}.wav"
             sf.write(str(chunk_path), recording, self.sample_rate)

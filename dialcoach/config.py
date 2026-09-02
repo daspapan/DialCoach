@@ -25,11 +25,11 @@ class Settings:
     summary_model: str = field(
         default_factory=lambda: _env("DIALCOACH_SUMMARY_MODEL", "claude-sonnet-4-5")
     )
-    version: str = field(
-        default_factory=lambda: os.environ.get("DIALCOACH_VERSION", "v1")
+    db_version: str = field(
+        default_factory=lambda: os.environ.get("DIALCOACH_DB_VERSION", "v1")
     )
     db_path: Path = field(
-        default_factory=lambda: Path(_env("DIALCOACH_DB_PATH", f'./data/dialcoach_{{version}}.db'))
+        default_factory=lambda: Path(_env("DIALCOACH_DB_PATH", f'./data/dialcoach_v1.db'))
     )
     audio_dir: Path = field(
         default_factory=lambda: Path(_env("DIALCOACH_AUDIO_DIR", "./data/audio"))

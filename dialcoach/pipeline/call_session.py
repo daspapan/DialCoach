@@ -50,11 +50,16 @@ class CallSession:
         """Consume every chunk from `audio_source` until it's exhausted, then
         finalize the call (compute talk ratio, get a summary, write to db).
         """
+
         call = self.db.start_call(self.business_id, audio_path=self.audio_path)
+        print(f"Start call: {call.id}")
         result = CallSessionResult(call=call)
+        # print(f"Result: {type(result)} - {result}")
+        # print("Audio Source:", type(audio_source), audio_source)
 
         last_offset = 0.0
         for chunk_path, offset in audio_source.chunks():
+            print("[chunk_path, offset]", chunk_path, offset)
             last_offset = offset
             new_segments = self.transcriber.transcribe_chunk(str(chunk_path), offset_s=offset)
             for seg in new_segments:
@@ -68,7 +73,9 @@ class CallSession:
                         t_end=seg.t_end,
                     )
                 )
+                print("[Chunk to Text]", record.speaker, record.text)
                 self._segments.append(record)
+                print("[Length Segments]", len(self._segments))
 
             if new_segments and self._should_call_agent(offset):
                 self._run_live_coach(result)
@@ -90,6 +97,7 @@ class CallSession:
     def _run_live_coach(self, result: CallSessionResult) -> None:
         transcript = transcript_to_text(self._segments)
         try:
+            print("[Transcript]", transcript)
             update = self.agent.live_coach(transcript)
         except Exception:  # noqa: BLE001 - a dropped live suggestion must not kill the call
             logger.exception("live_coach call failed; continuing without a suggestion")
@@ -121,7 +129,7 @@ class CallSession:
         )
 
         if summary_result is not None:
-            from callcoach.db.models import LogEntry
+            from dialcoach.db.models import LogEntry
 
             self.db.add_log_entry(
                 LogEntry(

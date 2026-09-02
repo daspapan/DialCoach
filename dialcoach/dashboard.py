@@ -3,12 +3,12 @@ from __future__ import annotations
 import pandas as pd
 import streamlit as st
 
-from callcoach.config import get_settings
-from callcoach.db.repository import Database
-from callcoach.pipeline.scoring import transcript_to_text
-from callcoach.tracker.sync import TrackerSync
+from dialcoach.config import get_settings
+from dialcoach.db.repository import Database
+from dialcoach.pipeline.scoring import transcript_to_text
+from dialcoach.tracker.sync import TrackerSync
 
-st.set_page_config(page_title="Call Coach", page_icon="\U0001F4DE", layout="wide")
+st.set_page_config(page_title="Dial Coach", page_icon="\U0001F4DE", layout="wide")
 
 
 @st.cache_resource
@@ -23,7 +23,7 @@ def _load_db() -> Database:
 
 
 def main() -> None:
-    st.title("\U0001F4DE Call Coach")
+    st.title("\U0001F4DE Dial Coach")
     st.caption("Local phone-outreach tracker - everything on this page reads from your own machine.")
 
     settings = _settings()
@@ -42,7 +42,7 @@ def main() -> None:
     with tab_pipeline:
         st.subheader("Pipeline")
         if not businesses:
-            st.info("No businesses yet. Run `callcoach sync-tracker` to pull them from Campaign_Tracker.xlsx.")
+            st.info("No businesses yet. Run `dialcoach sync-tracker` to pull them from Campaign_Tracker.xlsx.")
         else:
             df = pd.DataFrame(
                 [
@@ -96,7 +96,7 @@ def main() -> None:
                         if not log_entry.confirmed:
                             if st.button(f"Confirm log entry #{log_entry.id}", key=f"confirm-{log_entry.id}"):
                                 db.confirm_log_entry(log_entry.id)
-                                st.success("Confirmed - run `callcoach push-log` to sync it to the tracker.")
+                                st.success("Confirmed - run `dialcoach push-log` to sync it to the tracker.")
                         else:
                             st.caption(
                                 "Confirmed"
